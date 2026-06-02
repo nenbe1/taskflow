@@ -1,51 +1,39 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from "react";
+import TaskCard from "./TaskCard"; // Assure-toi que le T et le C sont bien des majuscules
 
-export default function TaskDetail() {
-  // Extraction de l'identifiant depuis l'URL dynamique
-  const { id } = useParams();
-
-  // Lecture dans le localStorage pour récupérer la liste à jour
-  const localData = localStorage.getItem('taskflow_data');
-  const tasks = localData ? JSON.parse(localData) : [];
-
-  // Recherche de la tâche correspondante (attention à convertir le type de id en Number)
-  const task = tasks.find((t) => t.id === Number(id));
-
-  if (!task) {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <h2>Tâche introuvable</h2>
-        <Link to="/">Retourner au tableau de bord</Link>
-      </div>
-    );
+function TaskDetail({ tasks }) {
+  // Sécurité d'ingénierie : si "tasks" est en cours de chargement ou n'est pas un tableau
+  if (!tasks || !Array.isArray(tasks)) {
+    return <p style={{ padding: "20px", color: "#666" }}>Chargement des tâches depuis MongoDB Atlas...</p>;
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: 'auto' }}>
-      <Link to="/" style={{ display: 'inline-block', marginBottom: '1rem', color: '#007bff', textDecoration: 'none' }}>
-        &larr; Retour au tableau de bord
-      </Link>
+    <div className="task-detail-container" style={{ marginTop: "20px" }}>
+      <h2 style={{ color: "#333", fontSize: "1.5em", marginBottom: "15px" }}>
+        Mes tâches en cours ({tasks.length})
+      </h2>
       
-      <div style={{ border: '1px solid #ccc', padding: '2rem', borderRadius: '8px', backgroundColor: '#fff', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-        <span style={{ float: 'right', backgroundColor: '#eee', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-          ID: {task.id}
-        </span>
-        <h2 style={{ marginTop: 0, color: '#222' }}>{task.titre}</h2>
-        <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '1.5rem 0' }} />
-        
-        <h4>Description détaillée :</h4>
-        <p style={{ lineHeight: '1.6', color: '#555', backgroundColor: '#fcfcfc', padding: '1rem', borderRadius: '4px', borderLeft: '4px solid #007bff' }}>
-          {task.description}
+      {tasks.length === 0 ? (
+        <p style={{ color: "#888", fontStyle: "italic", padding: "10px", backgroundColor: "#f9f9f9", borderRadius: "5px" }}>
+          Aucune tâche enregistrée dans la base de données.
         </p>
-        
-        <div style={{ marginTop: '2rem' }}>
-          <strong>Statut actuel : </strong>
-          <span style={{ padding: '0.3rem 0.8rem', borderRadius: '4px', color: '#fff', fontWeight: 'bold', backgroundColor: task.statut === 'A faire' ? '#ffc107' : task.statut === 'En cours' ? '#17a2b8' : '#28a745' }}>
-            {task.statut}
-          </span>
+      ) : (
+        <div className="tasks-grid" style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          {tasks.map((task) => {
+            // Sécurité : Si une tâche dans la base est vide ou mal formatée, on passe à la suivante sans planter
+            if (!task) return null;
+            
+            return (
+              <TaskCard 
+                key={task._id || task.id || Math.random().toString()} 
+                task={task} 
+              />
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
+export default TaskDetail; // 👈 Attention : Utilise exactement le même nom avec la majuscule ici !

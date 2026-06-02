@@ -1,72 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-export default function TaskForm({ onAddTask }) {
-  // Pattern Composants Contrôlés : liaison des champs à des états dédiés
-  const [titre, setTitre] = useState('');
-  const [description, setDescription] = useState('');
-  const [statut, setStatut] = useState('A faire');
+function TaskForm({ onAddTask }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("À faire");
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Bloquer le comportement par défaut du navigateur
-
-    // Validation minimale
-    if (!titre.trim() || !description.trim()) {
-      alert("Veuillez remplir tous les champs");
+    e.preventDefault();
+    
+    // Sécurité : évite d'envoyer une tâche vide
+    if (!title.trim()) {
+      alert("Veuillez entrer un titre pour la tâche.");
       return;
     }
 
-    // Génération du nouvel objet tâche avec identifiant unique
-    const nouvelleTache = {
-      id: Date.now(), // Identifiant unique
-      titre: titre,
-      description: description,
-      statut: statut
+    const newTask = {
+      title: title.trim(),
+      description: description.trim(),
+      status: status
     };
 
-    // Remontée d'état via la fonction de rappel (callback)
-    onAddTask(nouvelleTache);
+    // Envoi au composant parent (App.jsx)
+    if (typeof onAddTask === "function") {
+      onAddTask(newTask);
+    }
 
-    // Réinitialisation du formulaire
-    setTitre('');
-    setDescription('');
-    setStatut('A faire');
+    // Réinitialisation des champs du formulaire
+    setTitle("");
+    setDescription("");
+    setStatus("À faire");
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', maxWidth: '400px' }}>
-      <h3>Ajouter une tâche</h3>
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Titre :</label>
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px", margin: "20px 0" }}>
+      <h2>Ajouter une tâche</h2>
+      
+      <div>
+        <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Titre :</label>
         <input 
           type="text" 
-          value={titre} 
-          onChange={(e) => setTitre(e.target.value)} 
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+          placeholder="Ex: Configurer le serveur DNS..." 
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{ padding: "8px", width: "100%", borderRadius: "4px", border: "1px solid #ccc" }}
         />
       </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Description :</label>
+
+      <div>
+        <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Description :</label>
         <textarea 
-          value={description} 
-          onChange={(e) => setDescription(e.target.value)} 
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', minHeight: '60px' }}
+          placeholder="Détails de la tâche..." 
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          style={{ padding: "8px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", minHeight: "60px" }}
         />
       </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Statut initial :</label>
+
+      <div>
+        <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Statut de la tâche :</label>
+        {/* Liste déroulante propre pour choisir le statut */}
         <select 
-          value={statut} 
-          onChange={(e) => setStatut(e.target.value)} 
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+          value={status} 
+          onChange={(e) => setStatus(e.target.value)}
+          style={{ padding: "8px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "#fff" }}
         >
-          <option value="A faire">A faire</option>
+          <option value="À faire">À faire</option>
           <option value="En cours">En cours</option>
-          <option value="Termine">Termine</option>
+          <option value="Terminé">Terminé</option>
         </select>
       </div>
-      <button type="submit" style={{ padding: '0.7rem 1.5rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-        Créer la tâche
+
+      <button type="submit" style={{ padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", marginTop: "5px" }}>
+        Ajouter à MongoDB Atlas
       </button>
     </form>
   );
 }
+
+export default TaskForm;
